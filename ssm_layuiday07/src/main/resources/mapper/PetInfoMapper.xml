@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.kgc.demo.dao.PetInfoMapper" >
+  <resultMap id="BaseResultMap" type="cn.kgc.demo.pojo.PetInfo" >
+    <id column="PetId" property="petid" jdbcType="INTEGER" />
+    <result column="PetName" property="petname" jdbcType="VARCHAR" />
+    <result column="BreedId" property="breedid" jdbcType="INTEGER" />
+    <result column="PetSex" property="petsex" jdbcType="INTEGER" />
+    <result column="Birthday" property="birthday" jdbcType="TIMESTAMP" />
+    <result column="Description" property="description" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    PetId, PetName, BreedId, PetSex, Birthday, Description
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from petinfo
+    where PetId = #{petid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from petinfo
+    where PetId = #{petid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.kgc.demo.pojo.PetInfo" >
+    insert into petinfo (PetId, PetName, BreedId, 
+      PetSex, Birthday, Description
+      )
+    values (#{petid,jdbcType=INTEGER}, #{petname,jdbcType=VARCHAR}, #{breedid,jdbcType=INTEGER}, 
+      #{petsex,jdbcType=INTEGER}, #{birthday,jdbcType=TIMESTAMP}, #{description,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.kgc.demo.pojo.PetInfo" >
+    insert into petinfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="petid != null" >
+        PetId,
+      </if>
+      <if test="petname != null" >
+        PetName,
+      </if>
+      <if test="breedid != null" >
+        BreedId,
+      </if>
+      <if test="petsex != null" >
+        PetSex,
+      </if>
+      <if test="birthday != null" >
+        Birthday,
+      </if>
+      <if test="description != null" >
+        Description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="petid != null" >
+        #{petid,jdbcType=INTEGER},
+      </if>
+      <if test="petname != null" >
+        #{petname,jdbcType=VARCHAR},
+      </if>
+      <if test="breedid != null" >
+        #{breedid,jdbcType=INTEGER},
+      </if>
+      <if test="petsex != null" >
+        #{petsex,jdbcType=INTEGER},
+      </if>
+      <if test="birthday != null" >
+        #{birthday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.kgc.demo.pojo.PetInfo" >
+    update petinfo
+    <set >
+      <if test="petname != null" >
+        PetName = #{petname,jdbcType=VARCHAR},
+      </if>
+      <if test="breedid != null" >
+        BreedId = #{breedid,jdbcType=INTEGER},
+      </if>
+      <if test="petsex != null" >
+        PetSex = #{petsex,jdbcType=INTEGER},
+      </if>
+      <if test="birthday != null" >
+        Birthday = #{birthday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="description != null" >
+        Description = #{description,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where PetId = #{petid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.kgc.demo.pojo.PetInfo" >
+    update petinfo
+    set PetName = #{petname,jdbcType=VARCHAR},
+      BreedId = #{breedid,jdbcType=INTEGER},
+      PetSex = #{petsex,jdbcType=INTEGER},
+      Birthday = #{birthday,jdbcType=TIMESTAMP},
+      Description = #{description,jdbcType=VARCHAR}
+    where PetId = #{petid,jdbcType=INTEGER}
+  </update>
+
+  <resultMap id="selBreed" type="PetInfo">
+    <association property="breedInfo" javaType="BreedInfo"  column="BreedId"
+                 select="cn.kgc.demo.dao.BreedInfoMapper.selectByPrimaryKey"/>
+  </resultMap>
+  <select id="selAllPetAndBreed" resultMap="selBreed">
+    select <include refid="Base_Column_List"/> from petinfo order by petid desc
+  </select>
+
+  <select id="selAllPetAndBreedParams" resultMap="selBreed">
+    select <include refid="Base_Column_List"/> from petinfo
+    <where>
+      <if test="petname!=null and petname!=''">
+        and PetName like concat("%",#{petname},"%")
+      </if>
+      <if test="breedid!=null">
+        and BreedId = #{breedid}
+      </if>
+    </where>
+   order by petid desc
+  </select>
+
+  <delete id="delBatchPetAndBreedByParams">
+    delete from petinfo where PetId in
+    <foreach collection="petIds" item="item"
+             open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </delete>
+</mapper>
